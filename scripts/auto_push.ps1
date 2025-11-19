@@ -1,6 +1,7 @@
 param(
     [string]$Message = "",
-    [switch]$All
+    [string]$OpenFile = "",
+    [switch]$UseOpenFile
 )
 
 # Ensure we're in a git repository
@@ -23,12 +24,43 @@ if (-not $Message) {
     $Message = "Auto push: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 }
 
-# Check working tree changes
+# If requested, determine commit message from the open file or most-recent file
+if ($UseOpenFile) {
+    if ($OpenFile) {
+        $fileName = Split-Path -Path $OpenFile -Leaf
+    } else {
+        # pick the most recently modified file in the repo (excluding .git)
+        try {
+            $recent = Get-ChildItem -Path $gitTop -Recurse -File -ErrorAction SilentlyContinue |
+                Where-Object { $_.FullName -notmatch '\\.git\\' } |
+                Sort-Object LastWriteTime -Descending |
+                Select-Object -First 1
+        } catch {
+            $recent = $null
+        }
+        if ($recent) { $fileName = $recent.Name } else { $fileName = $null }
+    }
+
+    if ($fileName) {
+        $Message = $fileName
+        Write-Host "Using commit message from file: $Message"
+    } else {
+        Write-Host "Could not determine an open file for commit message; falling back to default message."
+    }
+}
+
+# Stage changes using 'git add .'
+$statusBefore = & git status --porcelain
+Write-Host "Staging changes (git add .) ..."
+& git add .
+
+# Check working tree changes after staging
 $status = & git status --porcelain
 
 if ($status) {
-    Write-Host "Staging changes..."
-    & git add -A
+    if (-not $Message) {
+        $Message = "Auto push: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    }
 
     Write-Host "Committing with message:`n  $Message"
     $commit = & git commit -m "$Message" 2>&1
@@ -37,7 +69,7 @@ if ($status) {
         exit $LASTEXITCODE
     }
 } else {
-    Write-Host "No working-tree changes to commit."
+    Write-Host "No working-tree changes to commit after staging."
 }
 
 Write-Host "Pushing to origin/$branch..."

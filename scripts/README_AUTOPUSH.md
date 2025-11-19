@@ -16,6 +16,24 @@ Cara pakai cepat:
 
 Jika tidak menyertakan `-Message`, skrip akan membuat pesan otomatis dengan timestamp.
 
+Opsi untuk menggunakan nama file terbuka sebagai pesan commit:
+
+- Gunakan `-UseOpenFile` dan berikan path file lewat `-OpenFile`:
+
+```
+.\scripts\auto_push.ps1 -UseOpenFile -OpenFile "src\main\java\Bioskop11.java"
+```
+
+- Atau hanya jalankan `-UseOpenFile` tanpa `-OpenFile` — skrip akan mencoba memilih file yang paling baru dimodifikasi di repo:
+
+```
+.\scripts\auto_push.ps1 -UseOpenFile
+```
+
+Perilaku tambahan:
+- Skrip sekarang menggunakan `git add .` sebelum commit (sesuai permintaan).
+- Jika setelah `git add .` tidak ada perubahan, skrip tidak akan membuat commit atau push.
+
 Mengatasi policy eksekusi (jika diblokir):
 
 ```

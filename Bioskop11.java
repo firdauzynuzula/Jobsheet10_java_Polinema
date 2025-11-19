@@ -1,7 +1,7 @@
 public class Bioskop11 {
     public static void main(String[] args) {
         String [][] penonton = new String[4][2];
-        penonton[0][0] = "Amin";
+        // penonton[0][0] = "Amin";
         penonton[0][1] = "Bena";
         penonton[1][0] = "Candra";
         penonton[1][1] = "Dela";

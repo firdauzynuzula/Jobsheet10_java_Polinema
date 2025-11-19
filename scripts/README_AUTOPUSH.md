@@ -30,6 +30,12 @@ Opsi untuk menggunakan nama file terbuka sebagai pesan commit:
 .\scripts\auto_push.ps1 -UseOpenFile
 ```
 
+Format pesan commit yang dibuat otomatis sekarang:
+
+- Jika menggunakan `-UseOpenFile`, pesan utama akan menjadi: `update: {nama file yang terbuka}`.
+- Jika ada file baru yang ditambahkan (staged dengan status `A`), skrip akan menambahkan bagian `menambahkan : {nama file baru}`.
+- Jika tidak menggunakan `-UseOpenFile` dan Anda tidak memberikan `-Message`, skrip akan membuat pesan `update: {file yang diubah}` berdasarkan file yang dimodifikasi/staged.
+
 Perilaku tambahan:
 - Skrip sekarang menggunakan `git add .` sebelum commit (sesuai permintaan).
 - Jika setelah `git add .` tidak ada perubahan, skrip tidak akan membuat commit atau push.

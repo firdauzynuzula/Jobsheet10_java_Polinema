@@ -58,12 +58,61 @@ Write-Host "Staging changes (git add .) ..."
 $status = & git status --porcelain
 
 if ($status) {
-    if (-not $Message) {
-        $Message = "Auto push: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    # Get staged changes (A = added, M = modified, R = renamed)
+    $stagedRaw = & git diff --cached --name-status
+    $added = @()
+    $modified = @()
+
+    if ($stagedRaw) {
+        foreach ($line in $stagedRaw -split "`n") {
+            $l = $line.Trim()
+            if (-not $l) { continue }
+            $parts = $l -split "\t"
+            $code = $parts[0]
+            $path = $parts[-1]
+            $name = Split-Path -Path $path -Leaf
+
+            if ($code -match '^A') {
+                $added += $name
+            } elseif ($code -match '^M') {
+                $modified += $name
+            } elseif ($code -match '^R') {
+                # rename shows old and new path; prefer new name
+                $newName = Split-Path -Path $parts[-1] -Leaf
+                $modified += $newName
+            } else {
+                $modified += $name
+            }
+        }
     }
 
-    Write-Host "Committing with message:`n  $Message"
-    $commit = & git commit -m "$Message" 2>&1
+    # Build message parts
+    $messageParts = @()
+
+    if ($UseOpenFile -and $fileName) {
+        $messageParts += "update: $fileName"
+    } elseif (-not $Message) {
+        # If no explicit Message and no UseOpenFile, use modified files list if present
+        if ($modified.Count -gt 0) {
+            $messageParts += "update: $($modified -join ', ')"
+        }
+    }
+
+    if ($added.Count -gt 0) {
+        $messageParts += "menambahkan : $($added -join ', ')"
+    }
+
+    if ($Message) {
+        # explicit message overrides composed parts
+        $finalMessage = $Message
+    } elseif ($messageParts.Count -gt 0) {
+        $finalMessage = $messageParts -join '; '
+    } else {
+        $finalMessage = "Auto push: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    }
+
+    Write-Host "Committing with message:`n  $finalMessage"
+    $commit = & git commit -m "$finalMessage" 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Commit failed: $commit"
         exit $LASTEXITCODE

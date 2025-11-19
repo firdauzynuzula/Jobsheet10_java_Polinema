@@ -27,4 +27,9 @@ penonton[3].length memiliki nilai yang sama? Mengapa?
 5. Modifikasi kode program pada pertanyaan 4 untuk menampilkan panjang setiap baris
 pada array menggunakan for loop. Compile, run, lalu amati hasilnya. 
 
-    for (int i = 0; i < )
+    for (int i = 0; i < penonton.length; i++){
+        System.out.println("Panjang baris ke-" + (i+1) + ": " + penonton[i].length);
+    }
+
+6. Modifikasi kode program pada pertanyaan 5 untuk menampilkan panjang setiap baris
+pada array menggunakan foreach loop. Compile, run, lalu amati hasilnya.

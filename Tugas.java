@@ -1,5 +1,8 @@
+import java.util.Scanner;
+
 public class Tugas {
     public static void main(String[] args) {
-        System.out.println("hello world");
+        Scanner scanner = new Scanner(System.in);
+        
     }
 }
